@@ -9,8 +9,8 @@ import java.util.logging.Logger;
 
 public class UporabnikDaoImpl implements BaseDao {
 
-    private static       UporabnikDaoImpl instance;
-    private static final Logger           log = Logger.getLogger(UporabnikDaoImpl.class.getName());
+    private static UporabnikDaoImpl instance;
+    private static final Logger log = Logger.getLogger(UporabnikDaoImpl.class.getName());
 
     private Connection connection;
 
@@ -33,8 +33,7 @@ public class UporabnikDaoImpl implements BaseDao {
             InitialContext initCtx = new InitialContext();
             DataSource ds = (DataSource) initCtx.lookup("jdbc/SimpleJdbcDS");
             return ds.getConnection();
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             log.severe("Cannot get connection: " + e.toString());
         }
         return null;
@@ -54,21 +53,17 @@ public class UporabnikDaoImpl implements BaseDao {
 
             if (rs.next()) {
                 return getUporabnikFromRS(rs);
-            }
-            else {
+            } else {
                 log.info("Uporabnik ne obstaja");
             }
 
-        }
-        catch (SQLException e) {
+        } catch (SQLException e) {
             log.severe(e.toString());
-        }
-        finally {
+        } finally {
             if (ps != null) {
                 try {
                     ps.close();
-                }
-                catch (SQLException e) {
+                } catch (SQLException e) {
                     log.severe(e.toString());
                 }
             }
@@ -79,18 +74,79 @@ public class UporabnikDaoImpl implements BaseDao {
     @Override
     public void vstavi(Entiteta ent) {
         //programska koda za vstavljanje uporabnikov
+        PreparedStatement preparedStatement = null;
 
+        try {
+            if (ent instanceof Uporabnik) {
+                String sql = "INSERT INTO uporabnik(ime, priimek, uporabniskoime) VALUES (?, ?, ?)";
+                preparedStatement = connection.prepareStatement(sql);
+
+                preparedStatement.setString(1, ((Uporabnik) ent).getIme());
+                preparedStatement.setString(2, ((Uporabnik) ent).getPriimek());
+                preparedStatement.setString(3, ((Uporabnik) ent).getUporabniskoIme());
+
+                preparedStatement.execute();
+            }
+        } catch (SQLException e) {
+            log.severe(e.toString());
+        } finally {
+            if (preparedStatement != null) {
+                try {
+                    preparedStatement.close();
+                } catch (SQLException e) {
+                    log.severe(e.toString());
+                }
+            }
+        }
     }
 
     @Override
     public void odstrani(int id) {
-        //programska koda za odstranjevanje uporabnikov
+        Statement st = null;
+
+        try {
+            st = connection.createStatement();
+            String sql = "DELETE FROM uporabnik WHERE id = " + id;
+            st.execute(sql);
+        } catch (SQLException e) {
+            log.severe(e.toString());
+        } finally {
+            if (st != null) {
+                try {
+                    st.close();
+                } catch (SQLException e) {
+                    log.severe(e.toString());
+                }
+            }
+        }
     }
 
     @Override
     public void posodobi(Entiteta ent) {
         //programska koda za posodabljanje uporabnikov
+        PreparedStatement preparedStatement = null;
 
+        try {
+            if (ent instanceof Uporabnik) {
+                String sql = "UPDATE uporabnik SET ime = ?, priimek = ?, uporabniskoime = ? WHERE id = ?";
+                preparedStatement = connection.prepareStatement(sql);
+                preparedStatement.setString(1, ((Uporabnik) ent).getIme());
+                preparedStatement.setString(2, ((Uporabnik) ent).getPriimek());
+                preparedStatement.setString(3, ((Uporabnik) ent).getUporabniskoIme());
+                preparedStatement.setInt(4, ent.getId());
+                preparedStatement.execute();
+            }
+        } catch (SQLException e) {
+            log.severe(e.toString());
+        } finally {
+            if (preparedStatement != null) {
+                try {
+                    preparedStatement.close();
+                } catch (SQLException e) {
+                    log.severe(e.toString());
+                }
+            }
+        }
     }
 
     @Override
@@ -109,16 +165,13 @@ public class UporabnikDaoImpl implements BaseDao {
                 entitete.add(getUporabnikFromRS(rs));
             }
 
-        }
-        catch (SQLException e) {
+        } catch (SQLException e) {
             log.severe(e.toString());
-        }
-        finally {
+        } finally {
             if (st != null) {
                 try {
                     st.close();
-                }
-                catch (SQLException e) {
+                } catch (SQLException e) {
                     log.severe(e.toString());
                 }
             }
@@ -128,10 +181,11 @@ public class UporabnikDaoImpl implements BaseDao {
 
     private static Uporabnik getUporabnikFromRS(ResultSet rs) throws SQLException {
 
+        Integer id = rs.getInt("id");
         String ime = rs.getString("ime");
         String priimek = rs.getString("priimek");
         String uporabniskoIme = rs.getString("uporabniskoime");
-        return new Uporabnik(ime, priimek, uporabniskoIme);
+        return new Uporabnik(id, ime, priimek, uporabniskoIme);
 
     }
 }

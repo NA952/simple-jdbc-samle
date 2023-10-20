@@ -33,22 +33,43 @@ public class PrviJdbcServlet extends HttpServlet {
         // dostop do podatkovne baye
         BaseDao uporabnikDao = UporabnikDaoImpl.getInstance();
 
-        Uporabnik uporabnik = new Uporabnik("Miha", "Novak", "mihanovak");
+        Uporabnik uporabnik = new Uporabnik(null, "Miha", "Novak", "mihanovak");
 
         // dodajanje uporabnika
-        //writer.append("Dodajam uporabnika:\n" + uporabnik.toString());
-        //uporabnikDao.vstavi(uporabnik);
-        //writer.append("\n\n");
-
-        // demonstracija preostalih metod
+        writer.append("Dodajam uporabnika:\n").append(uporabnik.toString());
+        uporabnikDao.vstavi(uporabnik);
+        writer.append("\n\n");
 
         // izpis vseh uporabnikov
         writer.append("Seznam obstojecih uporabnikov:\n");
         List<Entiteta> uporabniki = uporabnikDao.vrniVse();
-        uporabniki.stream().forEach(u -> writer.append(u.toString() + "\n"));
+        uporabniki.forEach(u -> writer.append(u.toString()).append("\n"));
+        writer.append("\n");
 
+        // urejanje uporabnika
+        writer.append("Urejam uporabnika: \n").append(uporabnik.toString());
+        uporabniki = uporabnikDao.vrniVse();
+        if (!uporabniki.isEmpty()) {
+            Uporabnik user = (Uporabnik) uporabniki.get(0);
+            user.setIme("Janez");
+            uporabnikDao.posodobi(user);
+        }
+        writer.append("\n\n");
 
+        // izpis vseh uporabnikov
+        writer.append("Seznam obstojecih uporabnikov:\n");
+        uporabniki = uporabnikDao.vrniVse();
+        uporabniki.forEach(u -> writer.append(u.toString()).append("\n"));
+        writer.append("\n");
 
+        // brisanje uporabnika
+        writer.append("Brisem uporabnika: \n").append(uporabniki.get(0).toString());
+        uporabnikDao.odstrani(uporabniki.get(0).getId());
+        writer.append("\n\n");
 
+        // izpis vseh uporabnikov
+        writer.append("Seznam obstojecih uporabnikov:\n");
+        uporabniki = uporabnikDao.vrniVse();
+        uporabniki.forEach(u -> writer.append(u.toString()).append("\n"));
     }
 }

@@ -8,8 +8,9 @@ public class Uporabnik extends Entiteta {
     private String priimek;
     private String uporabniskoIme;
 
-    public Uporabnik(String ime, String priimek, String uporabniskoIme) {
+    public Uporabnik(Integer id, String ime, String priimek, String uporabniskoIme) {
         super();
+        super.setId(id);
         this.ime = ime;
         this.priimek = priimek;
         this.uporabniskoIme = uporabniskoIme;
